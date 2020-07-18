@@ -101,7 +101,7 @@ class Board extends React.Component {
         <button onClick={this.resetGame}>Reset Game</button>
         <div className={styles.squareGrid}>
           {squareMatrix[0].map((value, rowIndex) => (
-            <div className={styles.row}>
+            <div key={rowIndex} className={styles.row}>
               <Square
                 value={squareMatrix[rowIndex][0]}
                 onClick={() => this.onSquareClick(rowIndex, 0)}
