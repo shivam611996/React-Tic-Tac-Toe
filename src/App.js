@@ -22,41 +22,39 @@ class Board extends React.Component {
   }
 
   getTheWinner = () => {
-    if (this.movesCount > 4) {
-      const { squareMatrix, winner: stateWinner } = this.state;
-
+    const { squareMatrix, winner: stateWinner } = this.state;
+    if (this.movesCount > 4 && stateWinner === "None") {
       const sqSize = squareMatrix.length;
-      let winner = stateWinner || "None";
+      let winner = stateWinner;
 
-      if (winner === "None")
-        for (let r = 0; r < sqSize; r++) {
-          // row wise
-          if (
-            squareMatrix[r][0] &&
-            squareMatrix[r][0] === squareMatrix[r][1] &&
-            squareMatrix[r][1] === squareMatrix[r][2]
-          ) {
-            winner = squareMatrix[r][0];
-            break;
-          }
-
-          // column wise
-          if (
-            squareMatrix[0][r] &&
-            squareMatrix[0][r] === squareMatrix[1][r] &&
-            squareMatrix[1][r] === squareMatrix[2][r]
-          ) {
-            winner = squareMatrix[0][r];
-            break;
-          }
+      for (let r = 0; r < sqSize; r++) {
+        // row wise
+        if (
+          squareMatrix[r][0] &&
+          squareMatrix[r][0] === squareMatrix[r][1] &&
+          squareMatrix[r][1] === squareMatrix[r][2]
+        ) {
+          winner = squareMatrix[r][0];
+          break;
         }
+
+        // column wise
+        if (
+          squareMatrix[0][r] &&
+          squareMatrix[0][r] === squareMatrix[1][r] &&
+          squareMatrix[1][r] === squareMatrix[2][r]
+        ) {
+          winner = squareMatrix[0][r];
+          break;
+        }
+      }
 
       // daigonal wise
       if (winner === "None")
         if (
           squareMatrix[0][0] &&
           squareMatrix[0][0] === squareMatrix[1][1] &&
-          squareMatrix[0][0] === squareMatrix[1][1]
+          squareMatrix[1][1] === squareMatrix[2][2]
         ) {
           winner = squareMatrix[0][0];
         } else if (
@@ -74,17 +72,17 @@ class Board extends React.Component {
   };
 
   onSquareClick = (row, column) => {
-    const { squareMatrix, nextPlayer } = this.state;
+    const { squareMatrix, nextPlayer: prevPlayer } = this.state;
     if (!squareMatrix[row][column]) {
       const newSquareMatrix = [...squareMatrix];
-      const newNextPlayer = nextPlayer === "X" ? "O" : "X";
+      const nextPlayer = prevPlayer === "X" ? "O" : "X";
 
-      newSquareMatrix[row][column] = nextPlayer;
+      newSquareMatrix[row][column] = prevPlayer;
       this.movesCount++;
       this.setState(
         {
           squareMatrix: newSquareMatrix,
-          nextPlayer: newNextPlayer
+          nextPlayer
         },
         () => this.getTheWinner()
       );
