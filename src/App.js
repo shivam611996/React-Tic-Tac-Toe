@@ -3,66 +3,74 @@ import styles from "./styles.module.css";
 
 const Square = ({ value, onClick }) => {
   return (
-    <div onClick={onClick} className={styles.square}>
+    <div role="button" onClick={onClick} className={styles.square}>
       {value}
     </div>
   );
 };
 
 class Board extends React.Component {
-  state = {
-    squareMatrix: [["", "", ""], ["", "", ""], ["", "", ""]],
-    nextPlayer: "X",
-    winner: "None"
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      squareMatrix: [Array(3).fill(""), Array(3).fill(""), Array(3).fill("")],
+      nextPlayer: "X",
+      winner: "None"
+    };
+
+    this.movesCount = 0;
+  }
 
   getTheWinner = () => {
-    const { squareMatrix, winner: stateWinner } = this.state;
-    const sqSize = squareMatrix.length;
-    let winner = stateWinner || "None";
+    if (this.movesCount > 4) {
+      const { squareMatrix, winner: stateWinner } = this.state;
 
-    if (winner === "None")
-      for (let r = 0; r < sqSize; r++) {
-        // row wise
-        if (
-          squareMatrix[r][0] &&
-          squareMatrix[r][0] === squareMatrix[r][1] &&
-          squareMatrix[r][1] === squareMatrix[r][2]
-        ) {
-          winner = squareMatrix[r][0];
-          break;
+      const sqSize = squareMatrix.length;
+      let winner = stateWinner || "None";
+
+      if (winner === "None")
+        for (let r = 0; r < sqSize; r++) {
+          // row wise
+          if (
+            squareMatrix[r][0] &&
+            squareMatrix[r][0] === squareMatrix[r][1] &&
+            squareMatrix[r][1] === squareMatrix[r][2]
+          ) {
+            winner = squareMatrix[r][0];
+            break;
+          }
+
+          // column wise
+          if (
+            squareMatrix[0][r] &&
+            squareMatrix[0][r] === squareMatrix[1][r] &&
+            squareMatrix[1][r] === squareMatrix[2][r]
+          ) {
+            winner = squareMatrix[0][r];
+            break;
+          }
         }
 
-        // column wise
+      // daigonal wise
+      if (winner === "None")
         if (
-          squareMatrix[0][r] &&
-          squareMatrix[0][r] === squareMatrix[1][r] &&
-          squareMatrix[1][r] === squareMatrix[2][r]
+          squareMatrix[0][0] &&
+          squareMatrix[0][0] === squareMatrix[1][1] &&
+          squareMatrix[0][0] === squareMatrix[1][1]
         ) {
-          winner = squareMatrix[0][r];
-          break;
+          winner = squareMatrix[0][0];
+        } else if (
+          squareMatrix[0][2] &&
+          squareMatrix[0][2] === squareMatrix[1][1] &&
+          squareMatrix[1][1] === squareMatrix[2][0]
+        ) {
+          winner = squareMatrix[0][2];
         }
-      }
 
-    // daigonal wise
-    if (winner === "None")
-      if (
-        squareMatrix[0][0] &&
-        squareMatrix[0][0] === squareMatrix[1][1] &&
-        squareMatrix[0][0] === squareMatrix[1][1]
-      ) {
-        winner = squareMatrix[0][0];
-      } else if (
-        squareMatrix[0][2] &&
-        squareMatrix[0][2] === squareMatrix[1][1] &&
-        squareMatrix[1][1] === squareMatrix[2][0]
-      ) {
-        winner = squareMatrix[0][2];
-      }
-
-    this.setState({
-      winner
-    });
+      this.setState({
+        winner
+      });
+    }
   };
 
   onSquareClick = (row, column) => {
@@ -72,7 +80,7 @@ class Board extends React.Component {
       const newNextPlayer = nextPlayer === "X" ? "O" : "X";
 
       newSquareMatrix[row][column] = nextPlayer;
-
+      this.movesCount++;
       this.setState(
         {
           squareMatrix: newSquareMatrix,
@@ -85,10 +93,11 @@ class Board extends React.Component {
 
   resetGame = () => {
     this.setState({
-      squareMatrix: [["", "", ""], ["", "", ""], ["", "", ""]],
+      squareMatrix: [Array(3).fill(""), Array(3).fill(""), Array(3).fill("")],
       nextPlayer: "X",
       winner: "None"
     });
+    this.movesCount = 0;
   };
 
   render() {
@@ -100,20 +109,15 @@ class Board extends React.Component {
         <div>Winner: {winner}</div>
         <button onClick={this.resetGame}>Reset Game</button>
         <div className={styles.squareGrid}>
-          {squareMatrix[0].map((value, rowIndex) => (
+          {squareMatrix.map((value, rowIndex) => (
             <div key={rowIndex} className={styles.row}>
-              <Square
-                value={squareMatrix[rowIndex][0]}
-                onClick={() => this.onSquareClick(rowIndex, 0)}
-              />
-              <Square
-                value={squareMatrix[rowIndex][1]}
-                onClick={() => this.onSquareClick(rowIndex, 1)}
-              />
-              <Square
-                value={squareMatrix[rowIndex][2]}
-                onClick={() => this.onSquareClick(rowIndex, 2)}
-              />
+              {squareMatrix.map((value, columnIndex) => (
+                <Square
+                  key={columnIndex}
+                  value={squareMatrix[rowIndex][columnIndex]}
+                  onClick={() => this.onSquareClick(rowIndex, columnIndex)}
+                />
+              ))}
             </div>
           ))}
         </div>
